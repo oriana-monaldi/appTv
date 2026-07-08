@@ -4,6 +4,18 @@ import { useNavigate } from "react-router-dom";
 import AdminMenu from "../../layout/AdminMenu";
 import { createClientWithDevice } from "../../../services/clients";
 
+const toTitleCase = (value: string) => {
+  return value.toLowerCase().replace(/\b\w/g, (letter) => letter.toUpperCase());
+};
+
+const onlyNumbers = (value: string) => {
+  return value.replace(/\D/g, "");
+};
+
+const isValidEmail = (value: string) => {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+};
+
 const NuevoCliente = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -26,9 +38,18 @@ const NuevoCliente = () => {
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
+    const { name, value } = e.target;
+
+    let newValue = value;
+
+    if (name === "nombre") newValue = toTitleCase(value);
+    if (name === "dni") newValue = onlyNumbers(value).slice(0, 8);
+    if (name === "telefono") newValue = onlyNumbers(value);
+    if (name === "direccion") newValue = value.slice(0, 50);
+
     setForm({
       ...form,
-      [e.target.name]: e.target.value,
+      [name]: newValue,
     });
   };
 
@@ -48,6 +69,31 @@ const NuevoCliente = () => {
       !form.fechaInicio
     ) {
       alert("Completá todos los campos antes de guardar.");
+      return;
+    }
+
+    if (!/^\d+$/.test(form.dni)) {
+      alert("El DNI solo puede contener números.");
+      return;
+    }
+
+    if (form.dni.length > 8) {
+      alert("El DNI debe tener hasta 8 números.");
+      return;
+    }
+
+    if (!/^\d+$/.test(form.telefono)) {
+      alert("El teléfono solo puede contener números.");
+      return;
+    }
+
+    if (!isValidEmail(form.email)) {
+      alert("Ingresá un correo electrónico válido.");
+      return;
+    }
+
+    if (form.direccion.length > 50) {
+      alert("La dirección no puede superar los 50 caracteres.");
       return;
     }
 
@@ -116,6 +162,8 @@ const NuevoCliente = () => {
                 onChange={handleChange}
                 type="text"
                 placeholder="DNI"
+                maxLength={8}
+                inputMode="numeric"
                 className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-600 focus:border-blue-500"
               />
 
@@ -125,6 +173,7 @@ const NuevoCliente = () => {
                 onChange={handleChange}
                 type="text"
                 placeholder="Teléfono"
+                inputMode="numeric"
                 className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-600 focus:border-blue-500"
               />
 
@@ -142,6 +191,7 @@ const NuevoCliente = () => {
                 value={form.direccion}
                 onChange={handleChange}
                 type="text"
+                maxLength={50}
                 placeholder="Dirección"
                 className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-600 focus:border-blue-500"
               />
