@@ -9,30 +9,28 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import AdminMenu from "../../layout/AdminMenu";
-import { getClients } from "../../../services/clients";
-
-type Device = {
-  estado?: string;
-  active?: boolean;
-};
-
-type Client = {
-  id?: string;
-  dispositivos?: Device[];
-  devices?: Device[];
-};
+import { getClients, getDevices } from "../../../services/clients";
+import type { Client, Device } from "../../../types/clients";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [clients, setClients] = useState<Client[]>([]);
+  const [devices, setDevices] = useState<Device[]>([]);
   const [loading, setLoading] = useState(true);
-
+  const navigate = useNavigate();
   useEffect(() => {
     const loadDashboard = async () => {
       try {
         setLoading(true);
-        const data = await getClients();
-        setClients(data || []);
+
+        const [clientsData, devicesData] = await Promise.all([
+          getClients(),
+          getDevices(),
+        ]);
+
+        setClients(clientsData || []);
+        setDevices(devicesData || []);
       } catch (error) {
         console.error("Error cargando dashboard:", error);
       } finally {
@@ -43,18 +41,12 @@ const Dashboard = () => {
     loadDashboard();
   }, []);
 
-  const allDevices = clients.flatMap((client) => {
-    return client.dispositivos || client.devices || [];
-  });
-
   const totalClientes = clients.length;
-  const totalTvs = allDevices.length;
-
-  const activos = allDevices.filter((device) => {
-    return device.estado === "activo" || device.active === true;
-  }).length;
-
-  const inactivos = totalTvs - activos;
+  const totalTvs = devices.length;
+  const activos = devices.filter((device) => device.estado === "Activo").length;
+  const inactivos = devices.filter(
+    (device) => device.estado === "Inactivo",
+  ).length;
 
   const porcentajeActivos =
     totalTvs > 0 ? Math.round((activos / totalTvs) * 100) : 0;
@@ -68,6 +60,7 @@ const Dashboard = () => {
       <section className="mx-auto max-w-6xl">
         <header className="mb-8 flex items-center justify-between">
           <button
+            type="button"
             onClick={() => setMenuOpen(true)}
             className="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-800 bg-slate-900 transition hover:bg-slate-800"
           >
@@ -81,7 +74,10 @@ const Dashboard = () => {
             </p>
           </div>
 
-          <button className="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-800 bg-slate-900 transition hover:bg-slate-800">
+          <button
+            type="button"
+            className="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-800 bg-slate-900 transition hover:bg-slate-800"
+          >
             <Bell size={18} />
           </button>
         </header>
@@ -170,7 +166,11 @@ const Dashboard = () => {
                   </span>
                 </div>
 
-                <button className="rounded-lg bg-red-600 px-4 py-2 text-sm transition hover:bg-red-500">
+                <button
+                  type="button"
+                  onClick={() => navigate("/admin/servicios-inactivos")}
+                  className="rounded-lg bg-red-600 px-4 py-2 text-sm transition hover:bg-red-500"
+                >
                   Ver
                 </button>
               </div>

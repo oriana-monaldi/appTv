@@ -297,3 +297,13 @@ export const updateDeviceStatus = async ({
     updatedAt: serverTimestamp(),
   });
 };
+
+export const getDevices = async (): Promise<Device[]> => {
+  const q = query(collection(db, "devices"), orderBy("createdAt", "desc"));
+  const snapshot = await getDocs(q);
+
+  return snapshot.docs.map((document) => ({
+    ...document.data(),
+    id: document.id,
+  })) as Device[];
+};

@@ -10,7 +10,7 @@ import ClientsDetail from "./components/admin/clients/ClientsDetail";
 import DevicePayments from "./components/admin/clients/DevicePayments";
 import AltaTelevisor from "./components/admin/clients/AltaTelevisor";
 import EditarCliente from "./components/admin/clients/EditarCliente";
-
+import InactiveServices from "./components/admin/dashboard/InactiveServices";
 import ClientHome from "./components/cliente/ClientHome";
 import ClientPayments from "./components/cliente/ClientPayments";
 
@@ -86,6 +86,14 @@ function App() {
         <Route
           path="/cliente/televisores/:deviceId/cuotas"
           element={<ClientPayments />}
+        />
+        <Route
+          path="/admin/servicios-inactivos"
+          element={
+            <ProtectedRoute>
+              <InactiveServices />
+            </ProtectedRoute>
+          }
         />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
