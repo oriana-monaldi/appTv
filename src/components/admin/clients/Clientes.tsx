@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Menu, Search, Tv, Plus } from "lucide-react";
+import { Menu, Search, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import AdminMenu from "../../layout/AdminMenu";
 import { getClients, getDevicesByClientId } from "../../../services/clients";
@@ -9,11 +9,10 @@ const Clientes = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [clientes, setClientes] = useState<Client[]>([]);
   const [devicesByClient, setDevicesByClient] = useState<
-    Record<string, Device | undefined>
+    Record<string, Device[]>
   >({});
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [brandFilter, setBrandFilter] = useState("");
 
   const navigate = useNavigate();
 
@@ -23,11 +22,10 @@ const Clientes = () => {
         const clientsData = await getClients();
         setClientes(clientsData);
 
-        const devicesMap: Record<string, Device | undefined> = {};
+        const devicesMap: Record<string, Device[]> = {};
 
         for (const client of clientsData) {
-          const devices = await getDevicesByClientId(client.id);
-          devicesMap[client.id] = devices[0];
+          devicesMap[client.id] = await getDevicesByClientId(client.id);
         }
 
         setDevicesByClient(devicesMap);
@@ -41,17 +39,9 @@ const Clientes = () => {
     loadData();
   }, []);
 
-  const clientesFiltrados = clientes.filter((cliente) => {
-    const device = devicesByClient[cliente.id];
-
-    const coincideNombre = cliente.nombre
-      .toLowerCase()
-      .includes(search.toLowerCase());
-
-    const coincideMarca = brandFilter === "" || device?.marca === brandFilter;
-
-    return coincideNombre && coincideMarca;
-  });
+  const clientesFiltrados = clientes.filter((cliente) =>
+    cliente.nombre.toLowerCase().includes(search.toLowerCase()),
+  );
 
   return (
     <main className="min-h-screen bg-slate-950 px-4 py-5 text-white md:px-8 md:py-8">
@@ -60,6 +50,7 @@ const Clientes = () => {
       <section className="mx-auto w-full max-w-6xl">
         <header className="mb-5 flex items-center justify-between">
           <button
+            type="button"
             onClick={() => setMenuOpen(true)}
             className="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-800 bg-slate-900 transition hover:bg-slate-800"
           >
@@ -74,6 +65,7 @@ const Clientes = () => {
           </div>
 
           <button
+            type="button"
             onClick={() => navigate("/admin/clientes/nuevo")}
             className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white transition hover:bg-blue-500"
           >
@@ -81,31 +73,16 @@ const Clientes = () => {
           </button>
         </header>
 
-        <div className="mb-5 flex items-center gap-3">
-          <div className="flex flex-1 items-center gap-2 rounded-xl border border-slate-800 bg-slate-900 px-4 py-3">
-            <Search size={18} className="text-slate-500" />
+        <div className="mb-5 flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900 px-4 py-3">
+          <Search size={18} className="text-slate-500" />
 
-            <input
-              type="text"
-              placeholder="Buscar cliente..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-transparent text-sm text-white outline-none placeholder:text-slate-500"
-            />
-          </div>
-
-          <select
-            value={brandFilter}
-            onChange={(e) => setBrandFilter(e.target.value)}
-            className="h-12 rounded-xl border border-slate-800 bg-slate-900 px-3 text-sm text-white outline-none"
-          >
-            <option value="">Todas</option>
-            <option value="Samsung">Samsung</option>
-            <option value="LG">LG</option>
-            <option value="TCL">TCL</option>
-            <option value="Philco">Philco</option>
-            <option value="Noblex">Noblex</option>
-          </select>
+          <input
+            type="text"
+            placeholder="Buscar cliente..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full bg-transparent text-sm text-white outline-none placeholder:text-slate-500"
+          />
         </div>
 
         {loading ? (
@@ -115,46 +92,117 @@ const Clientes = () => {
             No se encontraron clientes.
           </div>
         ) : (
-          <section className="space-y-3 md:overflow-hidden md:rounded-2xl md:border md:border-slate-800 md:bg-slate-900 md:space-y-0">
-            <div className="hidden grid-cols-3 border-b border-slate-800 px-5 py-4 text-xs font-semibold uppercase tracking-wide text-slate-500 md:grid">
-              <span>Cliente</span>
-              <span>Televisor</span>
-              <span>Cuotas</span>
-            </div>
+          <>
+            <section className="space-y-3 md:hidden">
+              {clientesFiltrados.map((cliente) => {
+                const cantidadTelevisores =
+                  devicesByClient[cliente.id]?.length ?? 0;
 
-            {clientesFiltrados.map((cliente) => {
-              const device = devicesByClient[cliente.id];
+                return (
+                  <article
+                    key={cliente.id}
+                    onClick={() => navigate(`/admin/clientes/${cliente.id}`)}
+                    className="cursor-pointer rounded-2xl border border-slate-800 bg-slate-900 p-4 transition hover:border-blue-500 hover:bg-slate-800"
+                  >
+                    <div className="mb-4 flex items-start justify-between gap-3">
+                      <h3 className="text-base font-bold text-white">
+                        {cliente.nombre}
+                      </h3>
 
-              return (
-                <article
-                  key={cliente.id}
-                  onClick={() => navigate(`/admin/clientes/${cliente.id}`)}
-                  className="cursor-pointer rounded-xl border border-slate-800 bg-slate-900 p-4 transition hover:bg-slate-800 md:grid md:grid-cols-3 md:items-center md:rounded-none md:border-0 md:border-b md:border-slate-800 md:p-5"
-                >
-                  <div className="mb-4 md:mb-0">
-                    <h3 className="font-semibold text-white">
-                      {cliente.nombre}
-                    </h3>
-                    <p className="text-xs text-slate-500">
-                      {cliente.telefono || "Sin teléfono"}
-                    </p>
-                  </div>
+                      <span className="shrink-0 rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white">
+                        Ver detalle →
+                      </span>
+                    </div>
 
-                  <div className="mb-3 flex items-center gap-2 text-sm text-slate-300 md:mb-0">
-                    <Tv size={16} className="text-slate-500 md:hidden" />
-                    <span>{device?.nombre || "Sin televisor"}</span>
-                  </div>
+                    <div className="flex justify-between gap-4">
+                      <div className="min-w-0 flex-1 space-y-2 text-sm">
+                        <div className="flex items-center">
+                          <span className="w-14 text-xs text-slate-500">
+                            DNI:
+                          </span>
+                          <span className="text-sm text-white">
+                            {cliente.dni}
+                          </span>
+                        </div>
 
-                  <div className="flex items-center justify-between text-sm md:block">
-                    <span className="text-slate-500 md:hidden">Cuotas</span>
-                    <strong className="font-semibold text-white">
-                      {device?.cuotas || "-"}
-                    </strong>
-                  </div>
-                </article>
-              );
-            })}
-          </section>
+                        <div className="flex items-center">
+                          <span className="w-14 text-xs text-slate-500">
+                            Tel:
+                          </span>
+                          <span className="truncate text-sm text-white">
+                            {cliente.telefono || "-"}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex min-w-[70px] flex-col items-center justify-center">
+                        <span className="text-xl">📺</span>
+                        <span className="text-2xl font-bold text-white">
+                          {cantidadTelevisores}
+                        </span>
+                        <span className="text-[11px] text-slate-500">TVs</span>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </section>
+
+            <section className="hidden overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 md:block">
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-800 text-left text-xs uppercase tracking-wide text-slate-500">
+                    <th className="px-5 py-4 font-semibold">Cliente</th>
+                    <th className="px-5 py-4 font-semibold">DNI</th>
+                    <th className="px-5 py-4 font-semibold">Teléfono</th>
+                    <th className="px-5 py-4 text-center font-semibold">TVs</th>
+                    <th className="px-5 py-4 text-right font-semibold">
+                      Acción
+                    </th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {clientesFiltrados.map((cliente) => {
+                    const cantidadTelevisores =
+                      devicesByClient[cliente.id]?.length ?? 0;
+
+                    return (
+                      <tr
+                        key={cliente.id}
+                        onClick={() =>
+                          navigate(`/admin/clientes/${cliente.id}`)
+                        }
+                        className="cursor-pointer border-b border-slate-800 transition last:border-b-0 hover:bg-slate-800"
+                      >
+                        <td className="px-5 py-4 font-semibold text-white">
+                          {cliente.nombre}
+                        </td>
+
+                        <td className="px-5 py-4 text-sm text-slate-300">
+                          {cliente.dni}
+                        </td>
+
+                        <td className="px-5 py-4 text-sm text-slate-300">
+                          {cliente.telefono || "Sin teléfono"}
+                        </td>
+
+                        <td className="px-5 py-4 text-center text-sm font-bold text-white">
+                          {cantidadTelevisores}
+                        </td>
+
+                        <td className="px-5 py-4 text-right">
+                          <span className="inline-flex rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white">
+                            Ver →
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </section>
+          </>
         )}
       </section>
     </main>
