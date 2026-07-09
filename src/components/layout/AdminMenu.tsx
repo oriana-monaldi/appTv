@@ -1,16 +1,17 @@
 import { Link, useNavigate } from "react-router-dom";
 import { LogOut } from "lucide-react";
 
-type MenuProps = {
+type AdminMenuProps = {
   open: boolean;
   onClose: () => void;
 };
 
-const Menu = ({ open, onClose }: MenuProps) => {
+const AdminMenu = ({ open, onClose }: AdminMenuProps) => {
   const navigate = useNavigate();
 
   const logout = () => {
     localStorage.removeItem("isAuthenticated");
+    localStorage.removeItem("role");
     onClose();
     navigate("/login", { replace: true });
   };
@@ -53,20 +54,7 @@ const Menu = ({ open, onClose }: MenuProps) => {
             Clientes
           </Link>
 
-          <button className="rounded-xl px-4 py-3 text-left text-sm hover:bg-white/10">
-            Televisores
-          </button>
-
-          <button className="rounded-xl px-4 py-3 text-left text-sm hover:bg-white/10">
-            Suscripciones
-          </button>
-
-          <button className="rounded-xl px-4 py-3 text-left text-sm hover:bg-white/10">
-            Pagos
-          </button>
-
-          {/* Empuja el botón hacia abajo */}
-          <div className="mt-auto pt-6 border-t border-slate-800">
+          <div className="mt-auto border-t border-slate-800 pt-6">
             <button
               onClick={logout}
               className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm text-red-400 transition hover:bg-red-500/10"
@@ -81,4 +69,4 @@ const Menu = ({ open, onClose }: MenuProps) => {
   );
 };
 
-export default Menu;
+export default AdminMenu;
