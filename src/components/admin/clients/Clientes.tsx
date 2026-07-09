@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Bell, Menu, Search, SlidersHorizontal, Tv, Plus } from "lucide-react";
+import { Menu, Search, Tv, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import AdminMenu from "../../layout/AdminMenu";
 import { getClients, getDevicesByClientId } from "../../../services/clients";

@@ -13,7 +13,6 @@ import EditarCliente from "./components/admin/clients/EditarCliente";
 
 import ClientHome from "./components/cliente/ClientHome";
 import ClientPayments from "./components/cliente/ClientPayments";
-import ClientMenu from "./components/cliente/ClientMenu";
 
 function App() {
   return (
