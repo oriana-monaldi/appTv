@@ -3,6 +3,18 @@ import { ArrowLeft, Calendar } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { createDeviceForClient } from "../../../services/clients";
 
+const onlyNumbers = (value: string) => {
+  return value.replace(/\D/g, "");
+};
+
+const formatPrice = (value: string) => {
+  const numbers = value.replace(/\D/g, "");
+
+  if (!numbers) return "";
+
+  return Number(numbers).toLocaleString("es-AR");
+};
+
 const AltaTelevisor = () => {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -13,6 +25,7 @@ const AltaTelevisor = () => {
     marca: "",
     modelo: "",
     serie: "",
+    precioTotal: "",
     cantidadCuotas: "",
     fechaInicio: "",
   });
@@ -20,11 +33,27 @@ const AltaTelevisor = () => {
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
+    const { name, value } = e.target;
+
+    let newValue = value;
+
+    if (name === "precioTotal") {
+      newValue = formatPrice(value);
+    }
+
     setForm({
       ...form,
-      [e.target.name]: e.target.value,
+      [name]: newValue,
     });
   };
+
+  const valorCuota =
+    form.precioTotal && form.cantidadCuotas
+      ? Math.round(
+          Number(form.precioTotal.replace(/\./g, "")) /
+            Number(form.cantidadCuotas),
+        )
+      : 0;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,10 +67,21 @@ const AltaTelevisor = () => {
       !form.marca ||
       !form.modelo ||
       !form.serie ||
+      !form.precioTotal ||
       !form.cantidadCuotas ||
       !form.fechaInicio
     ) {
       alert("Completá todos los campos.");
+      return;
+    }
+
+    if (Number(form.precioTotal.replace(/\./g, "")) <= 0) {
+      alert("El precio total debe ser mayor a 0.");
+      return;
+    }
+
+    if (Number(form.cantidadCuotas) <= 0) {
+      alert("La cantidad de cuotas no es válida.");
       return;
     }
 
@@ -51,6 +91,7 @@ const AltaTelevisor = () => {
       await createDeviceForClient({
         clientId: id,
         ...form,
+        precioTotal: form.precioTotal.replace(/\./g, ""),
       });
 
       navigate(`/admin/clientes/${id}`);
@@ -126,6 +167,16 @@ const AltaTelevisor = () => {
             </h2>
 
             <div className="space-y-3">
+              <input
+                name="precioTotal"
+                value={form.precioTotal}
+                onChange={handleChange}
+                type="text"
+                inputMode="numeric"
+                placeholder="Precio total"
+                className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-600 focus:border-blue-500"
+              />
+
               <select
                 name="cantidadCuotas"
                 value={form.cantidadCuotas}
@@ -138,6 +189,15 @@ const AltaTelevisor = () => {
                 <option value="12">12 cuotas</option>
                 <option value="18">18 cuotas</option>
               </select>
+
+              {form.precioTotal && form.cantidadCuotas && (
+                <div className="rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-slate-300">
+                  Valor de cada cuota:{" "}
+                  <strong className="text-blue-400">
+                    ${valorCuota.toLocaleString("es-AR")}
+                  </strong>
+                </div>
+              )}
 
               <div className="flex items-center rounded-xl border border-slate-800 bg-slate-950 px-4 py-3">
                 <input

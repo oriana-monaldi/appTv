@@ -21,6 +21,7 @@ type DevicePayload = {
   serie: string;
   cantidadCuotas: string;
   fechaInicio: string;
+  precioTotal: string;
 };
 
 export const getClients = async (): Promise<Client[]> => {
@@ -78,7 +79,20 @@ const createDevice = async ({
   serie,
   cantidadCuotas,
   fechaInicio,
+  precioTotal,
 }: DevicePayload): Promise<string> => {
+  const cantidadCuotasNumber = Number(cantidadCuotas);
+  const precioTotalNumber = Number(precioTotal);
+  const valorCuota = precioTotalNumber / cantidadCuotasNumber;
+
+  if (!cantidadCuotasNumber || cantidadCuotasNumber <= 0) {
+    throw new Error("La cantidad de cuotas no es válida.");
+  }
+
+  if (!precioTotalNumber || precioTotalNumber <= 0) {
+    throw new Error("El precio total no es válido.");
+  }
+
   const deviceRef = await addDoc(collection(db, "devices"), {
     clientId,
     nombre: `${marca} ${modelo}`,
@@ -86,18 +100,20 @@ const createDevice = async ({
     modelo,
     serie,
     estado: "Activo",
-    cuotas: `0 / ${cantidadCuotas}`,
-    cantidadCuotas: Number(cantidadCuotas),
+    cuotas: `0 / ${cantidadCuotasNumber}`,
+    cantidadCuotas: cantidadCuotasNumber,
     cuotasPagas: 0,
+    precioTotal: precioTotalNumber,
+    valorCuota,
     fechaInicio,
     createdAt: serverTimestamp(),
   });
 
   await createInstallmentsForDevice({
     deviceId: deviceRef.id,
-    cantidadCuotas: Number(cantidadCuotas),
+    cantidadCuotas: cantidadCuotasNumber,
     fechaInicio,
-    monto: "$25.000",
+    monto: valorCuota,
   });
 
   return deviceRef.id;
@@ -114,6 +130,7 @@ export const createClientWithDevice = async ({
   serie,
   cantidadCuotas,
   fechaInicio,
+  precioTotal,
 }: {
   nombre: string;
   dni: string;
@@ -125,6 +142,7 @@ export const createClientWithDevice = async ({
   serie: string;
   cantidadCuotas: string;
   fechaInicio: string;
+  precioTotal: string;
 }) => {
   const clientRef = await addDoc(collection(db, "clients"), {
     nombre,
@@ -145,6 +163,7 @@ export const createClientWithDevice = async ({
     serie,
     cantidadCuotas,
     fechaInicio,
+    precioTotal,
   });
 
   return clientRef.id;
@@ -163,7 +182,7 @@ export const createInstallmentsForDevice = async ({
   deviceId: string;
   cantidadCuotas: number;
   fechaInicio: string;
-  monto: string;
+  monto: number;
 }) => {
   for (let i = 1; i <= cantidadCuotas; i++) {
     const fecha = new Date(`${fechaInicio}T00:00:00`);

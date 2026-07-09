@@ -9,6 +9,7 @@ export type Client = {
   direccion: string;
   estado: "Activo" | "Inactivo";
 };
+
 export type Device = {
   id: string;
   clientId: string;
@@ -22,6 +23,8 @@ export type Device = {
   cantidadCuotas?: number;
   cuotasPagas?: number;
   fechaInicio?: string;
+  precioTotal?: number;
+  valorCuota?: number;
 };
 
 export type Installment = {
@@ -29,6 +32,6 @@ export type Installment = {
   deviceId: string;
   numero: number;
   fecha: string;
-  monto: string;
+  monto: number;
   estado: "Pagada" | "Pendiente";
 };

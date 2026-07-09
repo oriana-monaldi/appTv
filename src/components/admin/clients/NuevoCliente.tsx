@@ -12,6 +12,13 @@ const onlyNumbers = (value: string) => {
   return value.replace(/\D/g, "");
 };
 
+const formatPrice = (value: string) => {
+  const numbers = value.replace(/\D/g, "");
+  if (!numbers) return "";
+
+  return Number(numbers).toLocaleString("es-AR");
+};
+
 const isValidEmail = (value: string) => {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 };
@@ -29,6 +36,7 @@ const NuevoCliente = () => {
     marca: "",
     modelo: "",
     serie: "",
+    precioTotal: "",
     cantidadCuotas: "",
     fechaInicio: "",
   });
@@ -47,11 +55,22 @@ const NuevoCliente = () => {
     if (name === "telefono") newValue = onlyNumbers(value);
     if (name === "direccion") newValue = value.slice(0, 50);
 
+    if (name === "precioTotal") {
+      newValue = formatPrice(value);
+    }
+
     setForm({
       ...form,
       [name]: newValue,
     });
   };
+
+  const precioTotalNumber = Number(form.precioTotal.replace(/\./g, ""));
+
+  const valorCuota =
+    precioTotalNumber && form.cantidadCuotas
+      ? Math.round(precioTotalNumber / Number(form.cantidadCuotas))
+      : 0;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,6 +84,7 @@ const NuevoCliente = () => {
       !form.marca ||
       !form.modelo ||
       !form.serie ||
+      !form.precioTotal ||
       !form.cantidadCuotas ||
       !form.fechaInicio
     ) {
@@ -97,9 +117,24 @@ const NuevoCliente = () => {
       return;
     }
 
+    if (precioTotalNumber <= 0) {
+      alert("El precio total debe ser mayor a 0.");
+      return;
+    }
+
+    if (Number(form.cantidadCuotas) <= 0) {
+      alert("La cantidad de cuotas no es válida.");
+      return;
+    }
+
     try {
       setSaving(true);
-      await createClientWithDevice(form);
+
+      await createClientWithDevice({
+        ...form,
+        precioTotal: form.precioTotal.replace(/\./g, ""),
+      });
+
       navigate("/admin/clientes");
     } catch (error) {
       console.error("Error creando cliente:", error);
@@ -133,6 +168,7 @@ const NuevoCliente = () => {
           </div>
 
           <button
+            type="button"
             onClick={() => setMenuOpen(true)}
             className="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-800 bg-slate-900 transition hover:bg-slate-800"
           >
@@ -244,6 +280,16 @@ const NuevoCliente = () => {
             </h2>
 
             <div className="space-y-3">
+              <input
+                name="precioTotal"
+                value={form.precioTotal}
+                onChange={handleChange}
+                type="text"
+                inputMode="numeric"
+                placeholder="Precio total"
+                className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-600 focus:border-blue-500"
+              />
+
               <select
                 name="cantidadCuotas"
                 value={form.cantidadCuotas}
@@ -257,16 +303,29 @@ const NuevoCliente = () => {
                 <option value="18">18 cuotas</option>
               </select>
 
-              <div className="flex items-center rounded-xl border border-slate-800 bg-slate-950 px-4 py-3">
+              {form.precioTotal && form.cantidadCuotas && (
+                <div className="rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-slate-300">
+                  Valor de cada cuota:{" "}
+                  <strong className="text-blue-400">
+                    ${valorCuota.toLocaleString("es-AR")}
+                  </strong>
+                </div>
+              )}
+
+              <label className="flex cursor-pointer items-center rounded-xl border border-slate-800 bg-slate-950 px-4 py-3">
                 <input
                   name="fechaInicio"
                   value={form.fechaInicio}
                   onChange={handleChange}
                   type="date"
-                  className="w-full bg-transparent text-sm text-white outline-none"
+                  className="w-full cursor-pointer bg-transparent text-sm text-white outline-none"
                 />
-                <Calendar size={18} className="text-slate-500" />
-              </div>
+
+                <Calendar
+                  size={18}
+                  className="pointer-events-none text-slate-500"
+                />
+              </label>
             </div>
           </section>
 
