@@ -3,10 +3,6 @@ import { ArrowLeft, Calendar } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { createDeviceForClient } from "../../../services/clients";
 
-const onlyNumbers = (value: string) => {
-  return value.replace(/\D/g, "");
-};
-
 const formatPrice = (value: string) => {
   const numbers = value.replace(/\D/g, "");
 

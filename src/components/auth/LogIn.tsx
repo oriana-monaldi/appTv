@@ -42,7 +42,7 @@ const LogIn = () => {
       localStorage.setItem("clientId", client.id);
 
       navigate("/cliente/home");
-    } catch (error) {
+    } catch {
       console.error(error);
       setError("Email o contraseña incorrectos.");
     } finally {

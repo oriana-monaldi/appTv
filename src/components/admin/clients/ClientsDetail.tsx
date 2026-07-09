@@ -36,26 +36,6 @@ const ClientsDetail = () => {
     loadClientDetail();
   }, [id]);
 
-  const toggleDeviceStatus = async (device: Device) => {
-    const nuevoEstado = device.estado === "Activo" ? "Inactivo" : "Activo";
-
-    try {
-      await updateDeviceStatus({
-        deviceId: device.id,
-        estado: nuevoEstado,
-      });
-
-      setDevices((prev) =>
-        prev.map((item) =>
-          item.id === device.id ? { ...item, estado: nuevoEstado } : item,
-        ),
-      );
-    } catch (error) {
-      console.error("Error actualizando estado:", error);
-      alert("No se pudo actualizar el estado del televisor.");
-    }
-  };
-
   if (loading) {
     return (
       <main className="min-h-screen bg-slate-950 px-4 py-5 text-white">
