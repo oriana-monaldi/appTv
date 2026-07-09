@@ -1,11 +1,7 @@
 import { useEffect, useState } from "react";
 import { ArrowLeft, Pencil, Plus, Tv, User } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
-import {
-  getClientById,
-  getDevicesByClientId,
-  updateDeviceStatus,
-} from "../../../services/clients";
+import { getClientById, getDevicesByClientId } from "../../../services/clients";
 import type { Client, Device } from "../../../types/clients";
 
 const ClientsDetail = () => {

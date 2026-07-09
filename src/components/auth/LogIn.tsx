@@ -19,7 +19,6 @@ const LogIn = () => {
 
     try {
       setLoading(true);
-      setError("");
 
       if (email === "admin2026@gmail.com") {
         await signInWithEmailAndPassword(auth, email, password);
