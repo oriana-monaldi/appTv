@@ -7,6 +7,17 @@ import {
 } from "../../services/clients";
 import type { Device, Installment } from "../../types/clients";
 
+const formatMoney = (value: number | string) => {
+  const numberValue = Number(value);
+
+  if (Number.isNaN(numberValue)) return "$0";
+
+  return numberValue.toLocaleString("es-AR", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  });
+};
+
 const ClientPayments = () => {
   const navigate = useNavigate();
   const { deviceId } = useParams();
@@ -95,7 +106,10 @@ const ClientPayments = () => {
                 </div>
 
                 <div className="text-right">
-                  <p className="text-sm font-bold">{cuota.monto}</p>
+                  <p className="text-sm font-bold">
+                    ${formatMoney(cuota.monto)}
+                  </p>
+
                   <span
                     className={`text-xs font-bold ${
                       pagada ? "text-green-400" : "text-orange-400"

@@ -52,6 +52,14 @@ const ClientMenu = ({ open, onClose }: Props) => {
             Inicio
           </Link>
 
+          <Link
+            to="/cliente/mis-televisores"
+            onClick={onClose}
+            className="rounded-xl px-4 py-3 text-white hover:bg-slate-800"
+          >
+            Mis televisores
+          </Link>
+
           <button
             onClick={logout}
             className="mt-6 flex items-center gap-3 rounded-xl px-4 py-3 text-red-400 hover:bg-red-500/10"

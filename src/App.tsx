@@ -13,6 +13,7 @@ import EditarCliente from "./components/admin/clients/EditarCliente";
 import InactiveServices from "./components/admin/dashboard/InactiveServices";
 import ClientHome from "./components/cliente/ClientHome";
 import ClientPayments from "./components/cliente/ClientPayments";
+import ClientDevices from "./components/cliente/ClientDevices";
 
 function App() {
   return (
@@ -95,6 +96,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="/cliente/mis-televisores" element={<ClientDevices />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>

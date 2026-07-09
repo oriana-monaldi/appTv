@@ -75,7 +75,7 @@ const EditarCliente = () => {
         ...form,
       });
 
-      navigate(`/admin/clientes/${id}`);
+      navigate(`/admin/clientes/${id}`, { replace: true });
     } catch (error) {
       console.error("Error editando cliente:", error);
       alert("No se pudo editar el cliente.");

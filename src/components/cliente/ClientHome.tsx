@@ -73,10 +73,6 @@ const ClientHome = () => {
             >
               <Menu size={22} />
             </button>
-
-            <button className="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-800 bg-slate-900">
-              <Bell size={20} />
-            </button>
           </header>
 
           <section className="mb-6">
@@ -118,9 +114,8 @@ const ClientHome = () => {
             </div>
           </section>
 
-          <section>
+          <section id="mis-televisores">
             <h2 className="mb-4 text-xl font-bold">Mis televisores</h2>
-
             {devices.length === 0 ? (
               <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5 text-sm text-slate-400">
                 Todavía no tenés televisores asociados.
