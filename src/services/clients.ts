@@ -9,7 +9,10 @@ import {
   serverTimestamp,
   updateDoc,
   where,
+  writeBatch,
 } from "firebase/firestore";
+
+import type { DocumentReference } from "firebase/firestore";
 
 import { db } from "./firebase";
 import type { Client, Device, Installment } from "../types/clients";
@@ -306,4 +309,49 @@ export const getDevices = async (): Promise<Device[]> => {
     ...document.data(),
     id: document.id,
   })) as Device[];
+};
+
+export const deleteClientCompletely = async (
+  clientId: string,
+): Promise<void> => {
+  if (!clientId) {
+    throw new Error("El ID del cliente es obligatorio.");
+  }
+
+  const devicesQuery = query(
+    collection(db, "devices"),
+    where("clientId", "==", clientId),
+  );
+
+  const devicesSnapshot = await getDocs(devicesQuery);
+
+  const referencesToDelete: DocumentReference[] = [];
+
+  for (const deviceDocument of devicesSnapshot.docs) {
+    const installmentsQuery = query(
+      collection(db, "installments"),
+      where("deviceId", "==", deviceDocument.id),
+    );
+
+    const installmentsSnapshot = await getDocs(installmentsQuery);
+
+    installmentsSnapshot.docs.forEach((installmentDocument) => {
+      referencesToDelete.push(installmentDocument.ref);
+    });
+
+    referencesToDelete.push(deviceDocument.ref);
+  }
+
+  referencesToDelete.push(doc(db, "clients", clientId));
+
+  for (let index = 0; index < referencesToDelete.length; index += 450) {
+    const batch = writeBatch(db);
+    const currentReferences = referencesToDelete.slice(index, index + 450);
+
+    currentReferences.forEach((documentReference) => {
+      batch.delete(documentReference);
+    });
+
+    await batch.commit();
+  }
 };
