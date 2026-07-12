@@ -14,6 +14,8 @@ import InactiveServices from "./components/admin/dashboard/InactiveServices";
 import ClientHome from "./components/cliente/ClientHome";
 import ClientPayments from "./components/cliente/ClientPayments";
 import ClientDevices from "./components/cliente/ClientDevices";
+import ListadoTelevisores from "./components/admin/dashboard/ListadoTelevisores";
+import TelevisoresActivos from "./components/admin/dashboard/TelevisoresActivos";
 
 function App() {
   return (
@@ -95,6 +97,18 @@ function App() {
               <InactiveServices />
             </ProtectedRoute>
           }
+        />
+        <Route
+          path="/admin/dashboard/servicios-inactivos"
+          element={<InactiveServices />}
+        />
+        <Route
+          path="/admin/dashboard/televisores"
+          element={<ListadoTelevisores />}
+        />
+        <Route
+          path="/admin/dashboard/televisores-activos"
+          element={<TelevisoresActivos />}
         />
         <Route path="/cliente/mis-televisores" element={<ClientDevices />} />
         <Route path="*" element={<Navigate to="/login" replace />} />

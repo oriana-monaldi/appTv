@@ -2,6 +2,7 @@ import { useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { Tv, Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+
 import { auth } from "../../services/firebase";
 import { loginClient } from "../../services/clients";
 
@@ -14,26 +15,38 @@ const LogIn = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    setError("");
+
+    if (!email.trim() || !password.trim()) {
+      setError("Completá el email y la contraseña.");
+      return;
+    }
 
     try {
       setLoading(true);
 
-      if (email === "admin2026@gmail.com") {
-        await signInWithEmailAndPassword(auth, email, password);
+      // Login administrador
+      if (email.trim().toLowerCase() === "admin2026@gmail.com") {
+        await signInWithEmailAndPassword(auth, email.trim(), password);
+
         localStorage.setItem("role", "admin");
+        localStorage.removeItem("clientId");
+
         navigate("/admin/dashboard");
         return;
       }
 
+      // Login cliente
       const client = await loginClient({
-        email,
+        email: email.trim(),
         password,
       });
 
       if (!client) {
-        setError("Email o contraseña incorrectos.");
+        setError("El email o la contraseña son incorrectos.");
         return;
       }
 
@@ -41,9 +54,9 @@ const LogIn = () => {
       localStorage.setItem("clientId", client.id);
 
       navigate("/cliente/home");
-    } catch {
-      console.error(error);
-      setError("Email o contraseña incorrectos.");
+    } catch (loginError) {
+      console.error("Error al iniciar sesión:", loginError);
+      setError("El email o la contraseña son incorrectos.");
     } finally {
       setLoading(false);
     }
@@ -58,6 +71,7 @@ const LogIn = () => {
           </div>
 
           <h1 className="text-2xl font-bold">Iniciar sesión</h1>
+
           <p className="mt-1 text-sm text-slate-400">
             Accedé a tu panel de gestión
           </p>
@@ -67,33 +81,50 @@ const LogIn = () => {
           <input
             type="email"
             placeholder="Email"
+            autoComplete="email"
+            disabled={loading}
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-600 focus:border-blue-500"
+            onChange={(e) => {
+              setEmail(e.target.value);
+              if (error) setError("");
+            }}
+            className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-600 focus:border-blue-500 disabled:opacity-60"
           />
 
           <div className="relative">
             <input
               type={showPassword ? "text" : "password"}
               placeholder="Contraseña"
+              autoComplete="current-password"
+              disabled={loading}
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 pr-12 text-sm text-white outline-none placeholder:text-slate-600 focus:border-blue-500"
+              onChange={(e) => {
+                setPassword(e.target.value);
+                if (error) setError("");
+              }}
+              className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 pr-12 text-sm text-white outline-none placeholder:text-slate-600 focus:border-blue-500 disabled:opacity-60"
             />
 
             <button
               type="button"
+              disabled={loading}
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 transition hover:text-white"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 transition hover:text-white disabled:opacity-60"
             >
               {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
           </div>
 
+          {error && (
+            <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm font-medium text-red-400">
+              {error}
+            </div>
+          )}
+
           <button
-            disabled={loading}
             type="submit"
-            className="w-full rounded-xl bg-blue-600 py-3 text-sm font-bold text-white transition hover:bg-blue-500 disabled:opacity-60"
+            disabled={loading}
+            className="w-full rounded-xl bg-blue-600 py-3 text-sm font-bold text-white transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {loading ? "Ingresando..." : "Ingresar"}
           </button>

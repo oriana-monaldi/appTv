@@ -83,39 +83,63 @@ const Dashboard = () => {
         </header>
 
         <section className="mb-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
-          <div className="rounded-xl border border-slate-800 bg-slate-900 p-3">
+          <button
+            type="button"
+            onClick={() => navigate("/admin/clientes")}
+            className="rounded-xl border border-slate-800 bg-slate-900 p-3 text-left transition hover:border-blue-500 hover:bg-slate-800"
+          >
             <Users className="mb-2 text-blue-400" size={18} />
+
             <p className="text-[11px] uppercase tracking-wide text-slate-500">
               Clientes
             </p>
+
             <h2 className="mt-1 text-xl font-bold md:text-2xl">
               {totalClientes}
             </h2>
-          </div>
+          </button>
 
-          <div className="rounded-xl border border-slate-800 bg-slate-900 p-3">
+          <button
+            type="button"
+            onClick={() => navigate("/admin/dashboard/televisores")}
+            className="rounded-xl border border-slate-800 bg-slate-900 p-3 text-left transition hover:border-cyan-500 hover:bg-slate-800"
+          >
             <Tv className="mb-2 text-cyan-400" size={18} />
+
             <p className="text-[11px] uppercase tracking-wide text-slate-500">
               TVs
             </p>
-            <h2 className="mt-1 text-xl font-bold md:text-2xl">{totalTvs}</h2>
-          </div>
 
-          <div className="rounded-xl border border-slate-800 bg-slate-900 p-3">
+            <h2 className="mt-1 text-xl font-bold md:text-2xl">{totalTvs}</h2>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => navigate("/admin/dashboard/televisores-activos")}
+            className="rounded-xl border border-slate-800 bg-slate-900 p-3 text-left transition hover:border-green-500 hover:bg-slate-800"
+          >
             <CheckCircle2 className="mb-2 text-green-400" size={18} />
+
             <p className="text-[11px] uppercase tracking-wide text-slate-500">
               Activos
             </p>
-            <h2 className="mt-1 text-xl font-bold md:text-2xl">{activos}</h2>
-          </div>
 
-          <div className="rounded-xl border border-slate-800 bg-slate-900 p-3">
+            <h2 className="mt-1 text-xl font-bold md:text-2xl">{activos}</h2>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => navigate("/admin/dashboard/servicios-inactivos")}
+            className="rounded-xl border border-slate-800 bg-slate-900 p-3 text-left transition hover:border-red-500 hover:bg-slate-800"
+          >
             <XCircle className="mb-2 text-red-400" size={18} />
+
             <p className="text-[11px] uppercase tracking-wide text-slate-500">
               Inactivos
             </p>
+
             <h2 className="mt-1 text-xl font-bold md:text-2xl">{inactivos}</h2>
-          </div>
+          </button>
         </section>
 
         <section className="mb-4 rounded-xl border border-slate-800 bg-slate-900 p-4">
