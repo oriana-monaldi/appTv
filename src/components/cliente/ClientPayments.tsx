@@ -1,5 +1,10 @@
 import { useEffect, useState } from "react";
-import { ArrowLeft, CheckCircle2, Clock } from "lucide-react";
+import {
+  ArrowLeft,
+  CheckCircle2,
+  ChevronRight,
+  Clock,
+} from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   getDeviceById,
@@ -10,7 +15,7 @@ import type { Device, Installment } from "../../types/clients";
 const formatMoney = (value: number | string) => {
   const numberValue = Number(value);
 
-  if (Number.isNaN(numberValue)) return "$0";
+  if (Number.isNaN(numberValue)) return "0";
 
   return numberValue.toLocaleString("es-AR", {
     minimumFractionDigits: 0,
@@ -28,7 +33,10 @@ const ClientPayments = () => {
 
   useEffect(() => {
     const loadPayments = async () => {
-      if (!deviceId) return;
+      if (!deviceId) {
+        setLoading(false);
+        return;
+      }
 
       try {
         const deviceData = await getDeviceById(deviceId);
@@ -45,6 +53,12 @@ const ClientPayments = () => {
 
     loadPayments();
   }, [deviceId]);
+
+  const handleInstallmentClick = (cuota: Installment) => {
+    if (!deviceId || cuota.estado !== "Pendiente") return;
+
+    navigate(`/cliente/dispositivos/${deviceId}/cuotas/${cuota.id}`);
+  };
 
   if (loading) {
     return (
@@ -67,8 +81,10 @@ const ClientPayments = () => {
       <section className="mx-auto w-full max-w-md">
         <header className="mb-6 flex items-center gap-4">
           <button
+            type="button"
             onClick={() => navigate(-1)}
-            className="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-800 bg-slate-900"
+            className="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-800 bg-slate-900 transition hover:bg-slate-800"
+            aria-label="Volver"
           >
             <ArrowLeft size={20} />
           </button>
@@ -80,13 +96,37 @@ const ClientPayments = () => {
         </header>
 
         <section className="space-y-3">
+          {cuotas.length === 0 && (
+            <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5 text-center">
+              <p className="text-sm text-slate-400">
+                Este dispositivo todavía no tiene cuotas.
+              </p>
+            </div>
+          )}
+
           {cuotas.map((cuota) => {
             const pagada = cuota.estado === "Pagada";
+            const pendiente = cuota.estado === "Pendiente";
 
             return (
               <article
                 key={cuota.id}
-                className="flex items-center justify-between rounded-2xl border border-slate-800 bg-slate-900 p-4"
+                role={pendiente ? "button" : undefined}
+                tabIndex={pendiente ? 0 : undefined}
+                onClick={() => handleInstallmentClick(cuota)}
+                onKeyDown={(event) => {
+                  if (
+                    pendiente &&
+                    (event.key === "Enter" || event.key === " ")
+                  ) {
+                    handleInstallmentClick(cuota);
+                  }
+                }}
+                className={`flex items-center justify-between rounded-2xl border border-slate-800 bg-slate-900 p-4 transition ${
+                  pendiente
+                    ? "cursor-pointer hover:border-orange-700 hover:bg-slate-800"
+                    : "cursor-default"
+                }`}
               >
                 <div className="flex items-center gap-3">
                   <div
@@ -105,18 +145,24 @@ const ClientPayments = () => {
                   </div>
                 </div>
 
-                <div className="text-right">
-                  <p className="text-sm font-bold">
-                    ${formatMoney(cuota.monto)}
-                  </p>
+                <div className="flex items-center gap-3">
+                  <div className="text-right">
+                    <p className="text-sm font-bold">
+                      ${formatMoney(cuota.monto)}
+                    </p>
 
-                  <span
-                    className={`text-xs font-bold ${
-                      pagada ? "text-green-400" : "text-orange-400"
-                    }`}
-                  >
-                    {cuota.estado}
-                  </span>
+                    <span
+                      className={`text-xs font-bold ${
+                        pagada ? "text-green-400" : "text-orange-400"
+                      }`}
+                    >
+                      {cuota.estado}
+                    </span>
+                  </div>
+
+                  {pendiente && (
+                    <ChevronRight size={18} className="text-slate-500" />
+                  )}
                 </div>
               </article>
             );

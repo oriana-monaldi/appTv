@@ -16,6 +16,7 @@ import ClientPayments from "./components/cliente/ClientPayments";
 import ClientDevices from "./components/cliente/ClientDevices";
 import ListadoTelevisores from "./components/admin/dashboard/ListadoTelevisores";
 import TelevisoresActivos from "./components/admin/dashboard/TelevisoresActivos";
+import InstallmentPayment from "./components/cliente/InstallmentPayment";
 
 function App() {
   return (
@@ -76,7 +77,10 @@ function App() {
             </ProtectedRoute>
           }
         />
-
+        <Route
+          path="/cliente/dispositivos/:deviceId/cuotas/:installmentId"
+          element={<InstallmentPayment />}
+        />
         <Route
           path="/admin/clientes/:clientId/televisores/:deviceId"
           element={
@@ -110,6 +114,7 @@ function App() {
           path="/admin/dashboard/televisores-activos"
           element={<TelevisoresActivos />}
         />
+
         <Route path="/cliente/mis-televisores" element={<ClientDevices />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
